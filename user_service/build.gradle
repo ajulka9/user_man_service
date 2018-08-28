@@ -9,13 +9,25 @@ repositories {
     mavenCentral()
 }
 
+//create a single Jar with all dependencies
+task outJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'User Service Jar',
+                'Implementation-Version': version,
+                'Main-Class': 'com.abhi.server.userservice.RestApplication'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 
 //compileJava {
 //    options.compilerArgs << '-Aorg.glassfish.hk2.metadata.location=META-INF/hk2-locator/acme'
 //}
 
 apply plugin: 'application'
-mainClassName = 'com.abhi.server.userservice.Server'
+mainClassName = 'com.abhi.server.userservice.RestApplication'
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -32,4 +44,7 @@ dependencies {
     compile "org.glassfish.jersey.media:jersey-media-json-jackson:2.25"
     compile "com.fasterxml.jackson.core:jackson-core:2.9.6"
     compile "com.fasterxml.jackson.core:jackson-databind:2.9.6"
+
+    implementation 'com.google.code.gson:gson:2.8.5'
+
 }
