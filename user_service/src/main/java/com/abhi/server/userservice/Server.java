@@ -17,7 +17,7 @@ public class Server {
      * Starts Grizzly HTTP server exposing JAX-RS resources defined in this application.
      * @return Grizzly HTTP server.
      */
-    public static HttpServer startServer() throws IOException
+    public static void startServer() throws IOException
     {
         // create a resource config that scans for JAX-RS resources and providers
         // in com.example.rest package
@@ -31,8 +31,26 @@ public class Server {
         HttpServer server =  GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc);
         System.out.println(String.format("Jersey app started with WADL available at "
                 + "%sapplication.wadl\nHit enter to stop it...", BASE_URI));
-        System.in.read();
-        server.stop();
-        return server;
+
+        // register shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Shut down hook: Stopping server..");
+                server.stop();
+            }
+        }, "shutdownHook"));
+
+        // run
+        try {
+            server.start();
+            System.out.println("Press CTRL^C to exit..");
+            Thread.currentThread().join();
+        } catch (Exception e) {
+            System.err.println("There was an error while starting Grizzly HTTP server.");
+        }
+//        System.in.read();
+//        server.stop();
+//        return server;
     }
 }
